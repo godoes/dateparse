@@ -5,7 +5,7 @@ import (
 	"fmt"
 	"time"
 
-	"github.com/araddon/dateparse"
+	"github.com/godoes/dateparse"
 	"github.com/scylladb/termtables"
 )
 
@@ -43,7 +43,7 @@ var examples = []string{
 	// dd/Mon/yyy  alpha Months
 	"06/Jan/2008:15:04:05 -0700",
 	"06/Jan/2008 15:04:05 -0700",
-	//   mm/dd/yy
+	//   MM/dd/yy
 	"3/31/2014",
 	"03/31/2014",
 	"08/21/71",
@@ -60,7 +60,7 @@ var examples = []string{
 	"4/02/2014 03:00:51",
 	"03/19/2012 10:11:59",
 	"03/19/2012 10:11:59.3186369",
-	// yyyy/mm/dd
+	// yyyy/MM/dd
 	"2014/3/31",
 	"2014/03/31",
 	"2014/4/8 22:05",
@@ -69,7 +69,7 @@ var examples = []string{
 	"2014/4/02 03:00:51",
 	"2012/03/19 10:11:59",
 	"2012/03/19 10:11:59.3186369",
-	// yyyy:mm:dd
+	// yyyy:MM:dd
 	"2014:3:31",
 	"2014:03:31",
 	"2014:4:8 22:05",
@@ -80,7 +80,7 @@ var examples = []string{
 	"2012:03:19 10:11:59.3186369",
 	// Chinese
 	"2014年04月08日",
-	//   yyyy-mm-ddThh
+	//   yyyy-MM-ddThh
 	"2006-01-02T15:04:05+0000",
 	"2009-08-12T22:15:09-07:00",
 	"2009-08-12T22:15:09",
@@ -88,7 +88,7 @@ var examples = []string{
 	"2009-08-12T22:15:09Z",
 	"2017-07-19T03:21:51:897+0100",
 	"2019-05-29T08:41-04", // no seconds, 2 digit TZ offset
-	//   yyyy-mm-dd hh:mm:ss
+	//   yyyy-MM-dd hh:mm:ss
 	"2014-04-26 17:24:37.3186369",
 	"2012-08-03 18:31:59.257000000",
 	"2014-04-26 17:24:37.123",
@@ -111,18 +111,18 @@ var examples = []string{
 	"2014-04",
 	"2014",
 	"2014-05-11 08:20:13,787",
-	// yyyy-mm-dd-07:00
+	// yyyy-MM-dd-07:00
 	"2020-07-20+08:00",
-	// mm.dd.yy
+	// MM.dd.yy
 	"3.31.2014",
 	"03.31.2014",
 	"08.21.71",
 	"2014.03",
 	"2014.03.30",
-	//  yyyymmdd and similar
+	//  yyyyMMdd and similar
 	"20140601",
 	"20140722105203",
-	// yymmdd hh:mm:yy  mysql log
+	// yyMMdd hh:mm:yy  mysql log
 	// 080313 05:21:55 mysqld started
 	"171113 14:14:20",
 	// unix seconds, ms, micro, nano

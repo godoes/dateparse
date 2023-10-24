@@ -131,18 +131,18 @@ const (
 )
 
 var (
-	// ErrAmbiguousMMDD for date formats such as 04/02/2014 the mm/dd vs dd/mm are
+	// ErrAmbiguousMMDD for date formats such as 04/02/2014 the MM/dd vs dd/MM are
 	// ambiguous, so it is an error for strict parse rules.
-	ErrAmbiguousMMDD = fmt.Errorf("This date has ambiguous mm/dd vs dd/mm type format")
+	ErrAmbiguousMMDD = fmt.Errorf("this date has ambiguous MM/dd vs dd/MM type format")
 )
 
 func unknownErr(datestr string) error {
-	return fmt.Errorf("Could not find format for %q", datestr)
+	return fmt.Errorf("could not find format for %q", datestr)
 }
 
 // ParseAny parse an unknown date format, detect the layout.
 // Normal parse.  Equivalent Timezone rules as time.Parse().
-// NOTE:  please see readme on mmdd vs ddmm ambiguous dates.
+// NOTE:  please see readme on MMdd vs ddMM ambiguous dates.
 func ParseAny(datestr string, opts ...ParserOption) (time.Time, error) {
 	p, err := parseTime(datestr, nil, opts...)
 	if err != nil {
@@ -153,7 +153,7 @@ func ParseAny(datestr string, opts ...ParserOption) (time.Time, error) {
 
 // ParseIn with Location, equivalent to time.ParseInLocation() timezone/offset
 // rules.  Using location arg, if timezone/offset info exists in the
-// datestring, it uses the given location rules for any zone interpretation.
+// date string, it uses the given location rules for any zone interpretation.
 // That is, MST means one thing when using America/Denver and something else
 // in other locations.
 func ParseIn(datestr string, loc *time.Location, opts ...ParserOption) (time.Time, error) {
@@ -170,15 +170,14 @@ func ParseIn(datestr string, loc *time.Location, opts ...ParserOption) (time.Tim
 // Set Location to time.Local.  Same as ParseIn Location but lazily uses
 // the global time.Local variable for Location argument.
 //
-//     denverLoc, _ := time.LoadLocation("America/Denver")
-//     time.Local = denverLoc
+//	denverLoc, _ := time.LoadLocation("America/Denver")
+//	time.Local = denverLoc
 //
-//     t, err := dateparse.ParseLocal("3/1/2014")
+//	t, err := dateparse.ParseLocal("3/1/2014")
 //
 // Equivalent to:
 //
-//     t, err := dateparse.ParseIn("3/1/2014", denverLoc)
-//
+//	t, err := dateparse.ParseIn("3/1/2014", denverLoc)
 func ParseLocal(datestr string, opts ...ParserOption) (time.Time, error) {
 	p, err := parseTime(datestr, time.Local, opts...)
 	if err != nil {
@@ -201,12 +200,11 @@ func MustParse(datestr string, opts ...ParserOption) time.Time {
 	return t
 }
 
-// ParseFormat parse's an unknown date-time string and returns a layout
+// ParseFormat parse is an unknown date-time string and returns a layout
 // string that can parse this (and exact same format) other date-time strings.
 //
-//     layout, err := dateparse.ParseFormat("2013-02-01 00:00:00")
-//     // layout = "2006-01-02 15:04:05"
-//
+//	layout, err := dateparse.ParseFormat("2013-02-01 00:00:00")
+//	// layout = "2006-01-02 15:04:05"
 func ParseFormat(datestr string, opts ...ParserOption) (string, error) {
 	p, err := parseTime(datestr, nil, opts...)
 	if err != nil {
@@ -268,7 +266,7 @@ iterRunes:
 		//r := rune(datestr[i])
 		r, bytesConsumed := utf8.DecodeRuneInString(datestr[i:])
 		if bytesConsumed > 1 {
-			i += (bytesConsumed - 1)
+			i += bytesConsumed - 1
 		}
 
 		// gou.Debugf("i=%d r=%s state=%d   %s", i, string(r), p.stateDate, datestr)
@@ -587,7 +585,7 @@ iterRunes:
 
 			switch r {
 			case '/':
-				// This is the 2nd / so now we should know start pts of all of the dd, mm, yy
+				// This is the 2nd / so we should now know start pts of all the dd, MM, yy
 				if p.preferMonthFirst {
 					if p.daylen == 0 {
 						p.daylen = i - p.dayi
@@ -668,12 +666,12 @@ iterRunes:
 				p.daylen = p.part1Len
 				p.setDay()
 				p.stateTime = timeStart
-				if i > p.daylen+len(" Sep") { //  November etc
-					// If len greather than space + 3 it must be full month
+				if i > p.daylen+len(" Sep") { //  November etc.
+					// If len greater than space + 3 it must be full month
 					p.stateDate = dateDigitWsMolong
 				} else {
-					// If len=3, the might be Feb or May?  Ie ambigous abbreviated but
-					// we can parse may with either.  BUT, that means the
+					// If len=3, the might be Feb or May?  Ie ambiguous abbreviated,
+					// but we can parse may with either.  BUT, that means the
 					// format may not be correct?
 					// mo := strings.ToLower(datestr[p.daylen+1 : i])
 					p.moi = p.daylen + 1
@@ -818,7 +816,7 @@ iterRunes:
 					p.skip = i + 2
 					i++
 					// TODO:  lets just make this "skip" as we don't need
-					// the mon, monday, they are all superfelous and not needed
+					// the mon, monday, they are all superfluous and not needed
 					// just lay down the skip, no need to fill and then skip
 				}
 			case r == '.':
@@ -1677,7 +1675,7 @@ iterRunes:
 
 			switch len(p.datestr) - p.offseti {
 			case 0, 1, 2, 4:
-				return p, fmt.Errorf("TZ offset not recognized %q near %q (must be 2 or 4 digits optional colon)", datestr, string(datestr[p.offseti:]))
+				return p, fmt.Errorf("TZ offset not recognized %q near %q (must be 2 or 4 digits optional colon)", datestr, datestr[p.offseti:])
 			case 3:
 				// 19:55:00+01
 				p.set(p.offseti, "-07")
@@ -1736,7 +1734,7 @@ iterRunes:
 		//  20180722105203       14 yyyyMMddhhmmss
 		//  1499979795437        13 milliseconds
 		//  1332151919           10 seconds
-		//  20140601             8  yyyymmdd
+		//  20140601             8  yyyyMMdd
 		//  2014                 4  yyyy
 		t := time.Time{}
 		if len(datestr) == len("1499979655583057426") { // 19
@@ -1988,7 +1986,8 @@ type parser struct {
 	t                          *time.Time
 }
 
-// ParserOption defines a function signature implemented by options
+// ParserOption defines a function signature implemented by options.
+//
 // Options defined like this accept the parser and operate on the data within
 type ParserOption func(*parser) error
 
@@ -2021,7 +2020,7 @@ func newParser(dateStr string, loc *time.Location, opts ...ParserOption) *parser
 
 	// allow the options to mutate the parser fields from their defaults
 	for _, option := range opts {
-		option(p)
+		_ = option(p)
 	}
 	return p
 }

@@ -1,8 +1,6 @@
-DateParse CLI
-----------------------
+# DateParse CLI
 
 Simple CLI to test out dateparse.
-
 
 ```sh
 
@@ -35,7 +33,7 @@ Your Using time.Local set to location=America/Denver MDT
 +-------------+---------------------------+-------------------------------+-------------------------------------+
 
 
-#  Note on this one that the outputed zone is always UTC/0 offset as opposed to above
+#  Note on this one that the outputted zone is always UTC/0 offset as opposed to above
 
 $ dateparse --timezone="America/Denver" "2017-07-19 03:21:51+00:00"
 

@@ -6,8 +6,8 @@ import (
 	"os"
 	"time"
 
+	"github.com/godoes/dateparse"
 	"github.com/scylladb/termtables"
-	"github.com/araddon/dateparse"
 )
 
 var (
@@ -36,8 +36,8 @@ func main() {
 		fatal(err)
 	}
 
-	zonename, _ := time.Now().In(time.Local).Zone()
-	fmt.Printf("\nYour Current time.Local zone is %v\n", zonename)
+	zoneName, _ := time.Now().In(time.Local).Zone()
+	fmt.Printf("\nYour Current time.Local zone is %v\n", zoneName)
 	fmt.Printf("\nLayout String: dateparse.ParseFormat() => %v\n", layout)
 	var loc *time.Location
 	if timezone != "" {
@@ -48,8 +48,8 @@ func main() {
 			fatal(err)
 		}
 		loc = l
-		zonename, _ := time.Now().In(l).Zone()
-		fmt.Printf("\nYour Using time.Local set to location=%s %v \n", timezone, zonename)
+		zoneName, _ := time.Now().In(l).Zone()
+		fmt.Printf("\nYour Using time.Local set to location=%s %v \n", timezone, zoneName)
 	}
 	fmt.Printf("\n")
 
@@ -103,7 +103,7 @@ func parseIn(datestr string, loc *time.Location, utc bool) string {
 	return t.String()
 }
 
-func parseAny(datestr string, loc *time.Location, utc bool) string {
+func parseAny(datestr string, _ *time.Location, utc bool) string {
 	t, err := dateparse.ParseAny(datestr)
 	if err != nil {
 		return err.Error()
@@ -114,7 +114,7 @@ func parseAny(datestr string, loc *time.Location, utc bool) string {
 	return t.String()
 }
 
-func parseStrict(datestr string, loc *time.Location, utc bool) string {
+func parseStrict(datestr string, _ *time.Location, utc bool) string {
 	t, err := dateparse.ParseStrict(datestr)
 	if err != nil {
 		return err.Error()
