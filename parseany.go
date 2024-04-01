@@ -137,11 +137,12 @@ const (
 var (
 	// ErrAmbiguousMMDD for date formats such as 04/02/2014 the MM/dd vs dd/MM are
 	// ambiguous, so it is an error for strict parse rules.
-	ErrAmbiguousMMDD = fmt.Errorf("this date has ambiguous MM/dd vs dd/MM type format")
+	ErrAmbiguousMMDD      = fmt.Errorf("this date has ambiguous MM/dd vs dd/MM type format")
+	ErrCouldNotFindFormat = fmt.Errorf("could not find format for")
 )
 
 func unknownErr(datestr string) error {
-	return fmt.Errorf("could not find format for %q", datestr)
+	return fmt.Errorf("%w %q", ErrCouldNotFindFormat, datestr)
 }
 
 // ParseAny parse an unknown date format, detect the layout.
@@ -236,7 +237,10 @@ func ParseStrict(datestr string, opts ...ParserOption) (time.Time, error) {
 
 func parseTime(datestr string, loc *time.Location, opts ...ParserOption) (p *parser, err error) {
 
-	p = newParser(datestr, loc, opts...)
+	p, err = newParser(datestr, loc, opts...)
+	if err != nil {
+		return
+	}
 	if p.retryAmbiguousDateWithSwap {
 		// month out of range signifies that a day/month swap is the correct solution to an ambiguous date
 		// this is because it means that a day is being interpreted as a month and overflowing the valid value for that
@@ -252,7 +256,7 @@ func parseTime(datestr string, loc *time.Location, opts ...ParserOption) (p *par
 					// turn off the retry to avoid endless recursion
 					retryAmbiguousDateWithSwap := RetryAmbiguousDateWithSwap(false)
 					modifiedOpts := append(opts, preferMonthFirst, retryAmbiguousDateWithSwap)
-					p, err = parseTime(datestr, time.Local, modifiedOpts...)
+					p, _ = parseTime(datestr, time.Local, modifiedOpts...)
 				}
 			}
 
@@ -1185,8 +1189,15 @@ iterRunes:
 			// Thu, 4 Jan 2018 17:53:36 +0000
 			// Tue, 11 Jul 2017 16:28:13 +0200 (CEST)
 			// Mon, 02-Jan-06 15:04:05 MST
+			var offset int
 			switch r {
-			case ' ', '-':
+			case ' ':
+				for i+1 < len(datestr) && datestr[i+1] == ' ' {
+					i++
+					offset++
+				}
+				fallthrough
+			case '-':
 				if p.dayi == 0 {
 					p.dayi = i + 1
 				} else if p.moi == 0 {
@@ -1194,11 +1205,11 @@ iterRunes:
 					p.setDay()
 					p.moi = i + 1
 				} else if p.yeari == 0 {
-					p.molen = i - p.moi
+					p.molen = i - p.moi - offset
 					p.set(p.moi, "Jan")
 					p.yeari = i + 1
 				} else {
-					p.yearlen = i - p.yeari
+					p.yearlen = i - p.yeari - offset
 					p.setYear()
 					p.stateTime = timeStart
 					break iterRunes
@@ -1421,7 +1432,12 @@ iterRunes:
 				//     15:44:11 UTC+0100 2015
 				switch r {
 				case '+', '-':
-					p.tzlen = i - p.tzi
+					if datestr[p.tzi:i] == "GMT" {
+						p.tzi = 0
+						p.tzlen = 0
+					} else {
+						p.tzlen = i - p.tzi
+					}
 					if p.tzlen == 4 {
 						p.set(p.tzi, " MST")
 					} else if p.tzlen == 3 {
@@ -1532,7 +1548,6 @@ iterRunes:
 					if datestr[i-1] == 'm' {
 						p.extra = i - 2
 						p.trimExtra()
-						break
 					}
 				case '+', '-', '(':
 					// This really doesn't seem valid, but for some reason when round-tripping a go date
@@ -1542,7 +1557,6 @@ iterRunes:
 					p.extra = i - 1
 					p.stateTime = timeWsOffset
 					p.trimExtra()
-					break
 				default:
 					switch {
 					case unicode.IsDigit(r):
@@ -1689,7 +1703,6 @@ iterRunes:
 					// 00:00:00.000 +0300 +0300
 					p.extra = i - 1
 					p.trimExtra()
-					break
 				default:
 					if unicode.IsLetter(r) {
 						// 00:07:31.945167 +0000 UTC
@@ -1758,10 +1771,13 @@ iterRunes:
 			p.trimExtra()
 		case timeWsAlphaZoneOffset:
 			// 06:20:00 UTC-05
-			if i-p.offseti < 4 {
+			switch i - p.offseti {
+			case 2, 3, 4:
 				p.set(p.offseti, "-07")
-			} else {
+			case 5:
 				p.set(p.offseti, "-0700")
+			case 6:
+				p.set(p.offseti, "-07:00")
 			}
 
 		case timePeriod:
@@ -2135,7 +2151,7 @@ func RetryAmbiguousDateWithSwap(retryAmbiguousDateWithSwap bool) ParserOption {
 	}
 }
 
-func newParser(dateStr string, loc *time.Location, opts ...ParserOption) *parser {
+func newParser(dateStr string, loc *time.Location, opts ...ParserOption) (*parser, error) {
 	p := &parser{
 		stateDate:                  dateStart,
 		stateTime:                  timeIgnore,
@@ -2148,9 +2164,11 @@ func newParser(dateStr string, loc *time.Location, opts ...ParserOption) *parser
 
 	// allow the options to mutate the parser fields from their defaults
 	for _, option := range opts {
-		_ = option(p)
+		if err := option(p); err != nil {
+			return nil, fmt.Errorf("option error: %w", err)
+		}
 	}
-	return p
+	return p, nil
 }
 
 func (p *parser) nextIs(i int, b byte) bool {
@@ -2267,17 +2285,6 @@ func (p *parser) trimExtra() {
 		p.datestr = p.datestr[0:p.extra]
 	}
 }
-
-// func (p *parser) remove(i, length int) {
-// 	if len(p.format) > i+length {
-// 		//append(a[:i], a[j:]...)
-// 		p.format = append(p.format[0:i], p.format[i+length:]...)
-// 	}
-// 	if len(p.datestr) > i+length {
-// 		//append(a[:i], a[j:]...)
-// 		p.datestr = fmt.Sprintf("%s%s", p.datestr[0:i], p.datestr[i+length:])
-// 	}
-// }
 
 func (p *parser) parse() (time.Time, error) {
 	if p.t != nil {
