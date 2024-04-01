@@ -1963,10 +1963,15 @@ iterRunes:
 
 		return p, nil
 	case dateDigitDot:
-		// 2014.05
-		p.molen = i - p.moi
-		p.setMonth()
-		return p, nil
+		if len(datestr) == len("yyyyMMddhhmmss.SSS") { // 18
+			p.format = []byte("20060102150405.000")
+			return p, nil
+		} else {
+			// 2014.05
+			p.molen = i - p.moi
+			p.setMonth()
+			return p, nil
+		}
 
 	case dateDigitDotDot:
 		// 03.31.1981
