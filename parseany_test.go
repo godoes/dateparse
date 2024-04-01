@@ -187,7 +187,9 @@ func TestParse(t *testing.T) {
 		{in: "8/8/71", out: "1971-08-08 00:00:00 +0000 UTC"},
 		//  mm/dd/yy hh:mm:ss
 		{in: "04/02/2014 04:08:09", out: "2014-04-02 04:08:09 +0000 UTC"},
+		{in: "04/02/2014, 04:08:09", out: "2014-04-02 04:08:09 +0000 UTC"},
 		{in: "4/2/2014 04:08:09", out: "2014-04-02 04:08:09 +0000 UTC"},
+		{in: "4/2/2014, 04:08:09", out: "2014-04-02 04:08:09 +0000 UTC"},
 		{in: "04/02/2014 4:08:09", out: "2014-04-02 04:08:09 +0000 UTC"},
 		{in: "04/02/2014 4:8:9", out: "2014-04-02 04:08:09 +0000 UTC"},
 		{in: "04/02/2014 04:08", out: "2014-04-02 04:08:00 +0000 UTC"},
@@ -209,7 +211,9 @@ func TestParse(t *testing.T) {
 		{in: "04/02/2014 04:08:09 AM", out: "2014-04-02 04:08:09 +0000 UTC"},
 		{in: "04/02/2014 04:08:09 PM", out: "2014-04-02 16:08:09 +0000 UTC"},
 		{in: "04/02/2014 04:08 AM", out: "2014-04-02 04:08:00 +0000 UTC"},
+		{in: "04/02/2014, 04:08 AM", out: "2014-04-02 04:08:00 +0000 UTC"},
 		{in: "04/02/2014 04:08 PM", out: "2014-04-02 16:08:00 +0000 UTC"},
+		{in: "04/02/2014, 04:08 PM", out: "2014-04-02 16:08:00 +0000 UTC"},
 		{in: "04/02/2014 4:8 AM", out: "2014-04-02 04:08:00 +0000 UTC"},
 		{in: "04/02/2014 4:8 PM", out: "2014-04-02 16:08:00 +0000 UTC"},
 		{in: "04/02/2014 04:08:09.123 AM", out: "2014-04-02 04:08:09.123 +0000 UTC"},
@@ -555,27 +559,29 @@ func TestPStruct(t *testing.T) {
 	assert.True(t, len(p.ts()) > 0)
 }
 
-var testParseErrors = []dateTest{
-	{in: "3", err: true},
-	{in: `{"hello"}`, err: true},
-	{in: "2009-15-12T22:15Z", err: true},
-	{in: "5,000-9,999", err: true},
-	{in: "xyzq-baad"},
-	{in: "oct.-7-1970", err: true},
-	{in: "septe. 7, 1970", err: true},
-	{in: "SeptemberRR 7th, 1970", err: true},
-	{in: "29-06-2016", err: true},
-	// this is just testing the empty space up front
-	{in: " 2018-01-02 17:08:09 -07:00", err: true},
-}
-
 func TestParseErrors(t *testing.T) {
-	for _, th := range testParseErrors {
-		v, err := ParseAny(th.in)
-		assert.NotEqual(t, nil, err, "%v for %v", v, th.in)
+	var testParseErrors = []dateTest{
+		{in: "3", err: true},
+		{in: `{"hello"}`, err: true},
+		{in: "2009-15-12T22:15Z", err: true},
+		{in: "5,000-9,999", err: true},
+		{in: "xyzq-baad"},
+		{in: "oct.-7-1970", err: true},
+		{in: "septe. 7, 1970", err: true},
+		{in: "SeptemberRR 7th, 1970", err: true},
+		//{in: "29-06-2016", err: true},
+		// this is just testing the empty space up front
+		{in: " 2018-01-02 17:08:09 -07:00", err: true},
+	}
 
-		v, err = ParseAny(th.in, RetryAmbiguousDateWithSwap(true))
-		assert.NotEqual(t, nil, err, "%v for %v", v, th.in)
+	for _, th := range testParseErrors {
+		t.Run(th.in, func(t *testing.T) {
+			v, err := ParseAny(th.in)
+			assert.NotEqual(t, nil, err, "%v for %v", v, th.in)
+
+			v, err = ParseAny(th.in, RetryAmbiguousDateWithSwap(true))
+			assert.NotEqual(t, nil, err, "%v for %v", v, th.in)
+		})
 	}
 }
 

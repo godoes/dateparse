@@ -650,6 +650,7 @@ iterRunes:
 		case dateDigitSlash:
 			// 03/19/2012 10:11:59
 			// 04/2/2014 03:00:37
+			// 04/2/2014, 03:00:37
 			// 3/1/2012 10:11:59
 			// 4/8/2014 22:05
 			// 3/1/2014
@@ -679,6 +680,14 @@ iterRunes:
 				p.stateTime = timeStart
 				if p.yearlen == 0 {
 					p.yearlen = i - p.yeari
+					p.setYear()
+				}
+				break iterRunes
+			case ',':
+				p.stateTime = timeStart
+				if p.yearlen == 0 {
+					p.yearlen = i - p.yeari
+					i++
 					p.setYear()
 				}
 				break iterRunes
@@ -807,7 +816,6 @@ iterRunes:
 			// 2013年07月18日 星期四 10:27 上午
 			if r == ' ' {
 				p.stateDate = dateDigitChineseYearWs
-				break
 			}
 		case dateDigitDot:
 			// This is the 2nd period
@@ -1717,7 +1725,6 @@ iterRunes:
 				if r == '=' && datestr[i-1] == 'm' {
 					p.extra = i - 2
 					p.trimExtra()
-					break
 				}
 
 			case timePeriodWsOffsetColon:
@@ -2124,7 +2131,6 @@ type parser struct {
 	msi                        int
 	mslen                      int
 	offseti                    int
-	offsetlen                  int
 	tzi                        int
 	tzlen                      int
 	t                          *time.Time
