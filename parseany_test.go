@@ -15,15 +15,14 @@ func TestOne(t *testing.T) {
 }
 
 type dateTest struct {
-	in, out, loc string
-	err          bool
+	in, out string
+	err     bool
 }
 
 func TestParse(t *testing.T) {
 
 	type dateTest struct {
 		in, out, loc string
-		err          bool
 	}
 
 	var testInputs = []dateTest{
@@ -62,6 +61,7 @@ func TestParse(t *testing.T) {
 		{in: "Thu May  8 17:57:51 PST 2009", out: "2009-05-08 17:57:51 +0000 UTC"},
 		{in: "Thu May 08 17:57:51 PST 2009", out: "2009-05-08 17:57:51 +0000 UTC"},
 		{in: "Thu May 08 17:57:51 CEST 2009", out: "2009-05-08 17:57:51 +0000 UTC"},
+		{in: "Thu May 08 17:57:51 CEST 2009", out: "2009-05-08 15:57:51 +0000 UTC", loc: "Europe/Berlin"},
 		{in: "Thu May 08 05:05:07 PST 2009", out: "2009-05-08 05:05:07 +0000 UTC"},
 		{in: "Thu May 08 5:5:7 PST 2009", out: "2009-05-08 05:05:07 +0000 UTC"},
 		// Day Month dd time
@@ -74,22 +74,37 @@ func TestParse(t *testing.T) {
 		{in: "Fri Jul 03 2015 18:04:07 GMT+0100 (GMT Daylight Time)", out: "2015-07-03 17:04:07 +0000 UTC"},
 		{in: "Fri Jul 3 2015 06:04:07 GMT+0100 (GMT Daylight Time)", out: "2015-07-03 05:04:07 +0000 UTC"},
 		{in: "Fri Jul 3 2015 06:04:07 PST-0700 (Pacific Daylight Time)", out: "2015-07-03 13:04:07 +0000 UTC"},
+		{in: "Fri Jul 3 2015 06:04:07 CEST-0700 (Central European Summer Time)", out: "2015-07-03 13:04:07 +0000 UTC"},
 		// Month dd, yyyy at time
+		{in: "January 17, 2012 at 18:17:16", out: "2012-01-17 18:17:16 +0000 UTC"},
+		{in: "February 17, 2012 at 18:17:16", out: "2012-02-17 18:17:16 +0000 UTC"},
+		{in: "march 17, 2012 at 18:17:16", out: "2012-03-17 18:17:16 +0000 UTC"},
+		{in: "APRIL 17, 2012 at 18:17:16", out: "2012-04-17 18:17:16 +0000 UTC"},
+		{in: "May 17, 2012 at 18:17:16", out: "2012-05-17 18:17:16 +0000 UTC"},
+		{in: "June 17, 2012 at 18:17:16", out: "2012-06-17 18:17:16 +0000 UTC"},
+		{in: "July 17, 2012 at 18:17:16", out: "2012-07-17 18:17:16 +0000 UTC"},
+		{in: "august 17, 2012 at 18:17:16", out: "2012-08-17 18:17:16 +0000 UTC"},
+		{in: "September 17, 2012 at 18:17:16", out: "2012-09-17 18:17:16 +0000 UTC"},
+		{in: "OCTober 17, 2012 at 18:17:16", out: "2012-10-17 18:17:16 +0000 UTC"},
+		{in: "noVEMBER 17, 2012 at 18:17:16", out: "2012-11-17 18:17:16 +0000 UTC"},
+		{in: "December 17, 2012 at 18:17:16", out: "2012-12-17 18:17:16 +0000 UTC"},
 		{in: "September 17, 2012 at 5:00pm UTC-05", out: "2012-09-17 17:00:00 +0000 UTC"},
 		{in: "September 17, 2012 at 10:09am PST-08", out: "2012-09-17 18:09:00 +0000 UTC"},
+		{in: "September 17, 2012 at 10:09am CEST+02", out: "2012-09-17 08:09:00 +0000 UTC"},
 		{in: "September 17, 2012, 10:10:09", out: "2012-09-17 10:10:09 +0000 UTC"},
 		{in: "May 17, 2012 at 10:09am PST-08", out: "2012-05-17 18:09:00 +0000 UTC"},
 		{in: "May 17, 2012 AT 10:09am PST-08", out: "2012-05-17 18:09:00 +0000 UTC"},
+		{in: "May 17, 2012 AT 10:09am CEST+02", out: "2012-05-17 08:09:00 +0000 UTC"},
 		// Month dd, yyyy time
 		{in: "September 17, 2012 5:00pm UTC-05", out: "2012-09-17 17:00:00 +0000 UTC"},
 		{in: "September 17, 2012 10:09am PST-08", out: "2012-09-17 18:09:00 +0000 UTC"},
+		{in: "September 17, 2012 10:09am CEST+02", out: "2012-09-17 08:09:00 +0000 UTC"},
 		{in: "September 17, 2012 09:01:00", out: "2012-09-17 09:01:00 +0000 UTC"},
 		// Month dd yyyy time
 		{in: "September 17 2012 5:00pm UTC-05", out: "2012-09-17 17:00:00 +0000 UTC"},
 		{in: "September 17 2012 5:00pm UTC-0500", out: "2012-09-17 17:00:00 +0000 UTC"},
 		{in: "September 17 2012 10:09am PST-08", out: "2012-09-17 18:09:00 +0000 UTC"},
-		{in: "September 17 2012 5:00PM UTC-05", out: "2012-09-17 17:00:00 +0000 UTC"},
-		{in: "September 17 2012 10:09AM PST-08", out: "2012-09-17 18:09:00 +0000 UTC"},
+		{in: "September 17 2012 10:09AM CEST+02", out: "2012-09-17 08:09:00 +0000 UTC"},
 		{in: "September 17 2012 09:01:00", out: "2012-09-17 09:01:00 +0000 UTC"},
 		{in: "May 17, 2012 10:10:09", out: "2012-05-17 10:10:09 +0000 UTC"},
 		// Month dd, yyyy
@@ -115,7 +130,7 @@ func TestParse(t *testing.T) {
 		{in: "June 22nd 2012", out: "2012-06-22 00:00:00 +0000 UTC"},
 		// RFC1123     = "Mon, 02 Jan 2006 15:04:05 MST"
 		{in: "Fri, 03 Jul 2015 08:08:08 MST", out: "2015-07-03 08:08:08 +0000 UTC"},
-		//{in: "Fri, 03 Jul 2015 08:08:08 CET", out: "2015-07-03 08:08:08 +0000 UTC"},
+		{in: "Fri, 03 Jul 2015 08:08:08 CET", out: "2015-07-03 08:08:08 +0000 UTC"},
 		{in: "Fri, 03 Jul 2015 08:08:08 PST", out: "2015-07-03 16:08:08 +0000 UTC", loc: "America/Los_Angeles"},
 		{in: "Fri, 03 Jul 2015 08:08:08 PST", out: "2015-07-03 08:08:08 +0000 UTC"},
 		{in: "Fri, 3 Jul 2015 08:08:08 MST", out: "2015-07-03 08:08:08 +0000 UTC"},
@@ -130,6 +145,7 @@ func TestParse(t *testing.T) {
 		//
 		{in: "Tue, 11 Jul 2017 04:08:03 +0200 (CEST)", out: "2017-07-11 02:08:03 +0000 UTC"},
 		{in: "Tue, 5 Jul 2017 04:08:03 -0700 (CEST)", out: "2017-07-05 11:08:03 +0000 UTC"},
+		{in: "Tue, 5 Jul 2017 04:08:03 -0700 (MST)", out: "2017-07-05 11:08:03 +0000 UTC"},
 		{in: "Tue, 11 Jul 2017 04:08:03 +0200 (CEST)", out: "2017-07-11 02:08:03 +0000 UTC", loc: "Europe/Berlin"},
 		// day, dd-Mon-yy hh:mm:zz TZ
 		{in: "Fri, 03-Jul-15 08:08:08 MST", out: "2015-07-03 08:08:08 +0000 UTC"},
@@ -140,6 +156,7 @@ func TestParse(t *testing.T) {
 		{in: "Fri, 03-Jul-15 8:8:8 MST", out: "2015-07-03 08:08:08 +0000 UTC"},
 		// day, dd-Mon-yy hh:mm:zz TZ (text) https://github.com/araddon/dateparse/issues/116
 		{in: "Sun, 3 Jan 2021 00:12:23 +0800 (GMT+08:00)", out: "2021-01-02 16:12:23 +0000 UTC"},
+		{in: "Sun, 3 Jan 2021 00:12:23 +0800 (UTC+08:00)", out: "2021-01-02 16:12:23 +0000 UTC"},
 		// RFC850    = "Monday, 02-Jan-06 15:04:05 MST"
 		{in: "Wednesday, 07-May-09 08:00:43 MST", out: "2009-05-07 08:00:43 +0000 UTC"},
 		{in: "Wednesday, 28-Feb-18 09:01:00 MST", out: "2018-02-28 09:01:00 +0000 UTC"},
@@ -208,15 +225,25 @@ func TestParse(t *testing.T) {
 		{in: "04:02:2014 04:08:09.12312", out: "2014-04-02 04:08:09.12312 +0000 UTC"},
 		{in: "04:02:2014 04:08:09.123123", out: "2014-04-02 04:08:09.123123 +0000 UTC"},
 		//  mm/dd/yy hh:mm:ss AM
+		{in: "04/02/2014 04:08:09am", out: "2014-04-02 04:08:09 +0000 UTC"},
 		{in: "04/02/2014 04:08:09 AM", out: "2014-04-02 04:08:09 +0000 UTC"},
+		{in: "04/02/2014 04:08:09AM PST", out: "2014-04-02 04:08:09 +0000 UTC"},
+		{in: "04/02/2014 04:08:09pm", out: "2014-04-02 16:08:09 +0000 UTC"},
 		{in: "04/02/2014 04:08:09 PM", out: "2014-04-02 16:08:09 +0000 UTC"},
+		{in: "04/02/2014 04:08:09PM PST", out: "2014-04-02 16:08:09 +0000 UTC"},
+		{in: "04/02/2014 04:08am", out: "2014-04-02 04:08:00 +0000 UTC"},
 		{in: "04/02/2014 04:08 AM", out: "2014-04-02 04:08:00 +0000 UTC"},
+		{in: "04/02/2014 04:08pm", out: "2014-04-02 16:08:00 +0000 UTC"},
 		{in: "04/02/2014, 04:08 AM", out: "2014-04-02 04:08:00 +0000 UTC"},
 		{in: "04/02/2014 04:08 PM", out: "2014-04-02 16:08:00 +0000 UTC"},
+		{in: "04/02/2014 4:8AM", out: "2014-04-02 04:08:00 +0000 UTC"},
 		{in: "04/02/2014, 04:08 PM", out: "2014-04-02 16:08:00 +0000 UTC"},
 		{in: "04/02/2014 4:8 AM", out: "2014-04-02 04:08:00 +0000 UTC"},
+		{in: "04/02/2014 4:8pm", out: "2014-04-02 16:08:00 +0000 UTC"},
 		{in: "04/02/2014 4:8 PM", out: "2014-04-02 16:08:00 +0000 UTC"},
+		{in: "04/02/2014 04:08:09.123am", out: "2014-04-02 04:08:09.123 +0000 UTC"},
 		{in: "04/02/2014 04:08:09.123 AM", out: "2014-04-02 04:08:09.123 +0000 UTC"},
+		{in: "04/02/2014 04:08:09.123PM", out: "2014-04-02 16:08:09.123 +0000 UTC"},
 		{in: "04/02/2014 04:08:09.123 PM", out: "2014-04-02 16:08:09.123 +0000 UTC"},
 		//   yyyy/mm/dd
 		{in: "2014/04/02", out: "2014-04-02 00:00:00 +0000 UTC"},
@@ -232,10 +259,15 @@ func TestParse(t *testing.T) {
 		{in: "2014/4/2 04:08:09", out: "2014-04-02 04:08:09 +0000 UTC"},
 		{in: "2014/04/02 04:08:09.123", out: "2014-04-02 04:08:09.123 +0000 UTC"},
 		{in: "2014/04/02 04:08:09.123123", out: "2014-04-02 04:08:09.123123 +0000 UTC"},
+		{in: "2014/04/02 04:08:09am", out: "2014-04-02 04:08:09 +0000 UTC"},
 		{in: "2014/04/02 04:08:09 AM", out: "2014-04-02 04:08:09 +0000 UTC"},
+		{in: "2014/03/31 04:08:09am", out: "2014-03-31 04:08:09 +0000 UTC"},
 		{in: "2014/03/31 04:08:09 AM", out: "2014-03-31 04:08:09 +0000 UTC"},
+		{in: "2014/4/2 04:08:09AM", out: "2014-04-02 04:08:09 +0000 UTC"},
 		{in: "2014/4/2 04:08:09 AM", out: "2014-04-02 04:08:09 +0000 UTC"},
+		{in: "2014/04/02 04:08:09.123am", out: "2014-04-02 04:08:09.123 +0000 UTC"},
 		{in: "2014/04/02 04:08:09.123 AM", out: "2014-04-02 04:08:09.123 +0000 UTC"},
+		{in: "2014/04/02 04:08:09.123pm", out: "2014-04-02 16:08:09.123 +0000 UTC"},
 		{in: "2014/04/02 04:08:09.123 PM", out: "2014-04-02 16:08:09.123 +0000 UTC"},
 		// dd/mon/yyyy:hh:mm:ss tz  nginx-log?    https://github.com/araddon/dateparse/issues/118
 		// 112.195.209.90 - - [20/Feb/2018:12:12:14 +0800] "GET / HTTP/1.1" 200 190 "-" "Mozilla/5.0 (Linux; Android 6.0; Nexus 5 Build/MRA58N) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/63.0.3239.132 Mobile Safari/537.36" "-"
@@ -279,6 +311,23 @@ func TestParse(t *testing.T) {
 		{in: "2014-4-2 04:08:09 AM", out: "2014-04-02 04:08:09 +0000 UTC"},
 		{in: "2014-04-02 04:08:09.123 AM", out: "2014-04-02 04:08:09.123 +0000 UTC"},
 		{in: "2014-04-02 04:08:09.123 PM", out: "2014-04-02 16:08:09.123 +0000 UTC"},
+		{in: "2023-01-04 12:01 AM", out: "2023-01-04 00:01:00 +0000 UTC"},
+		{in: "2023-01-04 12:01:59 AM", out: "2023-01-04 00:01:59 +0000 UTC"},
+		// https://github.com/araddon/dateparse/issues/157
+		{in: "Thu Jan 28 2021 15:28:21 GMT+0000 (Coordinated Universal Time)", out: "2021-01-28 15:28:21 +0000 UTC"},
+		{in: "Thu Jan 28 2021 15:28:21 GMT+0100 (Coordinated Universal Time)", out: "2021-01-28 14:28:21 +0000 UTC"},
+		{in: "Thu Jan 28 2021 15:28:21 UTC+0000 (Coordinated Universal Time)", out: "2021-01-28 15:28:21 +0000 UTC"},
+		// https://github.com/araddon/dateparse/issues/130
+		{in: "1985-04-12T23:20:50Z", out: "1985-04-12 23:20:50 +0000 UTC"},
+		{in: "1985-04-12T23:20:50.52Z", out: "1985-04-12 23:20:50.52 +0000 UTC"},
+		// https://github.com/araddon/dateparse/issues/123
+		{in: "2017-04-03 22:32:14 CET", out: "2017-04-03 22:32:14 +0000 UTC"},
+		{in: "Mon Dec 26 16:22:08 2016", out: "2016-12-26 16:22:08 +0000 UTC"},
+		// https://github.com/araddon/dateparse/issues/109
+		{in: "Sun, 07 Jun 2020 00:00:00 +0100", out: "2020-06-06 23:00:00 +0000 UTC"},
+		// https://github.com/araddon/dateparse/issues/100#issuecomment-1118868154
+		{in: "1 Apr 2022 23:59", out: "2022-04-01 23:59:00 +0000 UTC"},
+		{in: "1 May 2022 23:59", out: "2022-05-01 23:59:00 +0000 UTC"},
 		//   yyyy-mm-dd hh:mm:ss,000
 		{in: "2014-05-11 08:20:13,787", out: "2014-05-11 08:20:13.787 +0000 UTC"},
 		//   yyyy-mm-dd hh:mm:ss +0000
@@ -343,9 +392,10 @@ func TestParse(t *testing.T) {
 		{in: "2012-8-03 18:31:59.257000000 UTC", out: "2012-08-03 18:31:59.257 +0000 UTC"},
 		{in: "2012-8-3 18:31:59.257000000 UTC", out: "2012-08-03 18:31:59.257 +0000 UTC"},
 		{in: "2014-04-26 17:24:37.123456 UTC", out: "2014-04-26 17:24:37.123456 +0000 UTC"},
+		{in: "2014-04-26 17:24:37.123456Z", out: "2014-04-26 17:24:37.123456 +0000 UTC"},
 		{in: "2014-04-26 17:24:37.12 UTC", out: "2014-04-26 17:24:37.12 +0000 UTC"},
 		{in: "2014-04-26 17:24:37.1 UTC", out: "2014-04-26 17:24:37.1 +0000 UTC"},
-		// This one is pretty special, it is TIMEZONE based but starts with P to emulate collions with PM
+		// This one is pretty special, it is TIMEZONE based but starts with P to emulate collisions with PM
 		{in: "2014-04-26 05:24:37 PST", out: "2014-04-26 05:24:37 +0000 UTC"},
 		{in: "2014-04-26 05:24:37 PST", out: "2014-04-26 13:24:37 +0000 UTC", loc: "America/Los_Angeles"},
 		//   yyyy-mm-dd hh:mm:ss+00:00
@@ -357,6 +407,7 @@ func TestParse(t *testing.T) {
 		{in: "08:03:2012 18:31:59+00:00", out: "2012-08-03 18:31:59 +0000 UTC"},
 		//   yyyy-mm-dd hh:mm:ss.000+00:00 PST
 		{in: "2012-08-03 18:31:59.000+00:00 PST", out: "2012-08-03 18:31:59 +0000 UTC", loc: "America/Los_Angeles"},
+		{in: "2012-08-03 18:31:59.000+00:00 CEST", out: "2012-08-03 18:31:59 +0000 UTC", loc: "Europe/Berlin"},
 		//   yyyy-mm-dd hh:mm:ss +00:00 TZ
 		{in: "2012-08-03 18:31:59 +00:00 UTC", out: "2012-08-03 18:31:59 +0000 UTC"},
 		{in: "2012-08-03 13:31:51 -07:00 MST", out: "2012-08-03 20:31:51 +0000 UTC", loc: "America/Denver"},
@@ -364,11 +415,17 @@ func TestParse(t *testing.T) {
 		{in: "2012-08-03 13:31:51.123 -08:00 PST", out: "2012-08-03 21:31:51.123 +0000 UTC", loc: "America/Los_Angeles"},
 		{in: "2012-08-03 13:31:51.123 +02:00 CEST", out: "2012-08-03 11:31:51.123 +0000 UTC", loc: "Europe/Berlin"},
 		{in: "2012-08-03 8:1:59.257000000 +00:00 UTC", out: "2012-08-03 08:01:59.257 +0000 UTC"},
+		{in: "2012-08-03 8:1:59.257000000 +00:00 CEST", out: "2012-08-03 08:01:59.257 +0000 UTC"},
 		{in: "2012-8-03 18:31:59.257000000 +00:00 UTC", out: "2012-08-03 18:31:59.257 +0000 UTC"},
+		{in: "2012-8-03 18:31:59.257000000 +00:00 CEST", out: "2012-08-03 18:31:59.257 +0000 UTC"},
 		{in: "2012-8-3 18:31:59.257000000 +00:00 UTC", out: "2012-08-03 18:31:59.257 +0000 UTC"},
+		{in: "2012-8-3 18:31:59.257000000 +00:00 CEST", out: "2012-08-03 18:31:59.257 +0000 UTC"},
 		{in: "2014-04-26 17:24:37.123456 +00:00 UTC", out: "2014-04-26 17:24:37.123456 +0000 UTC"},
+		{in: "2014-04-26 17:24:37.123456 +00:00 CEST", out: "2014-04-26 17:24:37.123456 +0000 UTC"},
 		{in: "2014-04-26 17:24:37.12 +00:00 UTC", out: "2014-04-26 17:24:37.12 +0000 UTC"},
+		{in: "2014-04-26 17:24:37.12 +00:00 CEST", out: "2014-04-26 17:24:37.12 +0000 UTC"},
 		{in: "2014-04-26 17:24:37.1 +00:00 UTC", out: "2014-04-26 17:24:37.1 +0000 UTC"},
+		{in: "2014-04-26 17:24:37.1 +00:00 CEST", out: "2014-04-26 17:24:37.1 +0000 UTC"},
 		//   yyyy-mm-ddThh:mm:ss
 		{in: "2009-08-12T22:15:09", out: "2009-08-12 22:15:09 +0000 UTC"},
 		{in: "2009-08-08T02:08:08", out: "2009-08-08 02:08:08 +0000 UTC"},
@@ -432,6 +489,8 @@ func TestParse(t *testing.T) {
 		// 080313 05:21:55 mysqld started
 		// 080313 5:21:55 InnoDB: Started; log sequence number 0 43655
 		{in: "171113 14:14:20", out: "2017-11-13 14:14:20 +0000 UTC"},
+		// https://github.com/araddon/dateparse/issues/94
+		{in: "190910 11:51:49", out: "2019-09-10 11:51:49 +0000 UTC"},
 
 		// all digits:  unix secs, ms etc
 		{in: "1332151919.329", out: "2012-03-19 10:11:59.329 +0000 UTC"},
@@ -527,10 +586,10 @@ func TestParse(t *testing.T) {
 	})
 }
 
-func testDidPanic(datestr string) (paniced bool) {
+func testDidPanic(datestr string) (panicked bool) {
 	defer func() {
 		if r := recover(); r != nil {
-			paniced = true
+			panicked = true
 		}
 	}()
 	MustParse(datestr)
@@ -572,6 +631,9 @@ func TestParseErrors(t *testing.T) {
 		//{in: "29-06-2016", err: true},
 		// this is just testing the empty space up front
 		{in: " 2018-01-02 17:08:09 -07:00", err: true},
+		// a semantic version number that starts with a date should not be interpreted as a date
+		{in: "1.22.2023-78888", err: true},
+		{in: "Doe, John", err: true},
 	}
 
 	for _, th := range testParseErrors {
@@ -628,48 +690,51 @@ func TestParseLayout(t *testing.T) {
 	}
 
 	for _, th := range testParseFormat {
-		l, err := ParseFormat(th.in)
-		if th.err {
-			assert.NotEqual(t, nil, err)
-		} else {
-			assert.Equal(t, nil, err)
-			assert.Equal(t, th.out, l, "for in=%v", th.in)
-		}
+		t.Run(th.in, func(t *testing.T) {
+			l, err := ParseFormat(th.in)
+			if th.err {
+				assert.NotEqual(t, nil, err)
+			} else {
+				assert.Equal(t, nil, err)
+				assert.Equal(t, th.out, l, "for in=%v", th.in)
+			}
+		})
 	}
-}
-
-var testParseStrict = []dateTest{
-	//   dd-mon-yy  13-Feb-03
-	{in: "03-03-14"},
-	//   mm.dd.yyyy
-	{in: "3.3.2014"},
-	//   mm.dd.yy
-	{in: "08.09.71"},
-	//  mm/dd/yyyy
-	{in: "3/5/2014"},
-	//  mm/dd/yy
-	{in: "08/08/71"},
-	{in: "8/8/71"},
-	//  mm/dd/yy hh:mm:ss
-	{in: "04/02/2014 04:08:09"},
-	{in: "4/2/2014 04:08:09"},
 }
 
 func TestParseStrict(t *testing.T) {
-
-	for _, th := range testParseStrict {
-		_, err := ParseStrict(th.in)
-		assert.NotEqual(t, nil, err)
+	var testParseStrict = []dateTest{
+		//   dd-mon-yy  13-Feb-03
+		{in: "03-03-14", err: true},
+		//   mm.dd.yyyy
+		{in: "3.3.2014", err: true},
+		//   mm.dd.yy
+		{in: "08.09.71", err: true},
+		//  mm/dd/yyyy
+		{in: "3/5/2014", err: true},
+		//  mm/dd/yy
+		{in: "08/08/71", err: true},
+		{in: "8/8/71", err: true},
+		//  mm/dd/yy hh:mm:ss
+		{in: "04/02/2014 04:08:09", err: true},
+		{in: "4/2/2014 04:08:09", err: true},
+		{in: `{"hello"}`, err: true},
+		{in: "2009-08-12T22:15Z"},
 	}
 
-	_, err := ParseStrict(`{"hello"}`)
-	assert.NotEqual(t, nil, err)
-
-	_, err = ParseStrict("2009-08-12T22:15Z")
-	assert.Equal(t, nil, err)
+	for _, th := range testParseStrict {
+		t.Run(th.in, func(t *testing.T) {
+			_, err := ParseStrict(th.in)
+			if th.err {
+				assert.NotEqual(t, nil, err)
+			} else {
+				assert.Equal(t, nil, err)
+			}
+		})
+	}
 }
 
-// Lets test to see how this performs using different Timezones/Locations
+// Let's test to see how this performs using different Timezones/Locations
 // Also of note, try changing your server/machine timezones and repeat
 //
 // !!!!! The time-zone of local machine effects the results!
@@ -690,7 +755,7 @@ func TestInLocation(t *testing.T) {
 	assert.Equal(t, "UTC", zone, "Should have found zone = UTC %v", zone)
 	assert.Equal(t, "2013-02-01 00:00:00 +0000 UTC", fmt.Sprintf("%v", ts.In(time.UTC)))
 
-	// Now lets set to denver (MST/MDT) and re-parse the same time string
+	// Now lets set to denver (MST/MDT) and reparse the same time string
 	// and since no timezone info in string, we expect same result
 	time.Local = denverLoc
 	ts = MustParse("2013-02-01 00:00:00")
@@ -729,7 +794,7 @@ func TestInLocation(t *testing.T) {
 	assert.Equal(t, "MST", zone, "Should have found zone = MST %v", zone)
 	assert.Equal(t, "2013-02-01 07:00:00 +0000 UTC", fmt.Sprintf("%v", ts.In(time.UTC)))
 
-	// Lets advance past daylight savings time start
+	// Let's advance past daylight savings time start
 	// use parseIn and see offset/zone has changed to Daylight Savings Equivalents
 	ts, err = ParseIn("2013-04-01 00:00:00", denverLoc)
 	assert.Equal(t, nil, err)
@@ -817,4 +882,9 @@ func TestRetryAmbiguousDateWithSwap(t *testing.T) {
 	ts, err := ParseAny("13/02/2014 04:08:09 +0000 UTC", retryAmbiguousDateWithSwapTrue)
 	assert.Equal(t, nil, err)
 	assert.Equal(t, "2014-02-13 04:08:09 +0000 UTC", fmt.Sprintf("%v", ts.In(time.UTC)))
+}
+
+// Convenience function for debugging a particular broken test case
+func TestDebug(t *testing.T) {
+	MustParse("Jul 9, 2012 at 5:02am (EST)")
 }

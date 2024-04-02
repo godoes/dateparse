@@ -87,9 +87,9 @@ const (
 	dateAlphaWsMonthMore
 	dateAlphaWsMonthSuffix
 	dateAlphaWsMore
-	dateAlphaWsAtTime
+	//dateAlphaWsAtTime
 	dateAlphaWsAlpha
-	dateAlphaWsAlphaYearmaybe // 35
+	//dateAlphaWsAlphaYearmaybe // 35
 	dateAlphaPeriodWsDigit
 	dateWeekdayComma
 	dateWeekdayAbbrevComma
@@ -118,7 +118,7 @@ const (
 	timeWsYear // 15
 	timeOffset
 	timeOffsetColon
-	timeAlpha
+	//timeAlpha
 	timePeriod
 	timePeriodOffset // 20
 	timePeriodOffsetColon
@@ -126,7 +126,7 @@ const (
 	timePeriodWs
 	timePeriodWsAlpha
 	timePeriodWsOffset // 25
-	timePeriodWsOffsetWs
+	//timePeriodWsOffsetWs
 	timePeriodWsOffsetWsAlpha
 	timePeriodWsOffsetColon
 	timePeriodWsOffsetColonAlpha
@@ -1370,7 +1370,7 @@ iterRunes:
 						p.minlen = i - p.mini
 					} else if p.seci > 0 {
 						// 18:31:59:257    ms is separated with a colon
-						// swap out the colon for a period and re-parse
+						// swap out the colon for a period and reparse
 						ds := []byte(p.datestr)
 						ds[i] = '.'
 						return parseTime(string(ds), loc, opts...)
@@ -1559,7 +1559,7 @@ iterRunes:
 					}
 				case '+', '-', '(':
 					// This really doesn't seem valid, but for some reason when round-tripping a go date
-					// their is an extra +03 printed out.  seems like go bug to me, but, parsing anyway.
+					// there is an extra +03 printed out.  seems like go bug to me, but, parsing anyway.
 					// 00:00:00 +0300 +03
 					// 00:00:00 +0300 +0300
 					p.extra = i - 1
@@ -1706,7 +1706,7 @@ iterRunes:
 					p.set(p.offseti, "-0700")
 				case '+', '-':
 					// This really doesn't seem valid, but for some reason when round-tripping a go date
-					// their is an extra +03 printed out.  seems like go bug to me, but, parsing anyway.
+					// there is an extra +03 printed out.  seems like go bug to me, but, parsing anyway.
 					// 00:00:00.000 +0300 +03
 					// 00:00:00.000 +0300 +0300
 					p.extra = i - 1
@@ -1752,7 +1752,7 @@ iterRunes:
 				if unicode.IsDigit(r) {
 					p.stateTime = timeZDigit
 				}
-
+			default:
 			}
 		}
 
@@ -1839,13 +1839,14 @@ iterRunes:
 			}
 		case timePeriodWsOffset:
 			p.set(p.offseti, "-0700")
+		default:
 		}
 		p.coalesceTime(i)
 	}
 
 	switch p.stateDate {
 	case dateDigit:
-		// unixy timestamps ish
+		// unix timestamps ish
 		//  example              ct type
 		//  1499979655583057426  19 nanoseconds
 		//  1499979795437000     16 micro-seconds
@@ -2098,6 +2099,7 @@ iterRunes:
 
 	case dateYearWsMonthWs:
 		return p, nil
+	default:
 	}
 
 	return nil, unknownErr(datestr)
