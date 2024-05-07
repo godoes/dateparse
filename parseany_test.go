@@ -841,12 +841,12 @@ func TestInLocation(t *testing.T) {
 	// Now some errors
 	zeroTime := time.Time{}.Unix()
 	ts, err = ParseIn("INVALID", denverLoc)
-	assert.Equal(t, zeroTime, ts.Unix())
 	assert.NotEqual(t, nil, err)
+	assert.Equal(t, zeroTime, ts.Unix())
 
 	ts, err = ParseLocal("INVALID")
-	assert.Equal(t, zeroTime, ts.Unix())
 	assert.NotEqual(t, nil, err)
+	assert.Equal(t, zeroTime, ts.Unix())
 }
 
 func TestPreferMonthFirst(t *testing.T) {

@@ -222,7 +222,7 @@ func ParseFormat(datestr string, opts ...ParserOption) (string, error) {
 	return string(p.format), nil
 }
 
-// ParseStrict parse an unknown date format.  IF the date is ambigous
+// ParseStrict parse an unknown date format.  IF the date is ambiguous
 // mm/dd vs dd/mm then return an error. These return errors:   3.3.2014 , 8/8/71 etc
 func ParseStrict(datestr string, opts ...ParserOption) (time.Time, error) {
 	p, err := parseTime(datestr, nil, opts...)
@@ -562,7 +562,7 @@ iterRunes:
 					// We have no idea if this is
 					// yy-mon-dd   OR  dd-mon-yy
 					//
-					// We are going to ASSUME (bad, bad) that it is dd-mon-yy  which is a horible assumption
+					// We are going to ASSUME (bad, bad) that it is dd-mon-yy  which is a horrible assumption
 					p.ambiguousMD = true
 					p.yearlen = 2
 					p.set(p.yeari, "06")
@@ -592,7 +592,7 @@ iterRunes:
 					// We have no idea if this is
 					// yy-mon-dd   OR  dd-mon-yy
 					//
-					// We are going to ASSUME (bad, bad) that it is dd-mon-yy  which is a horible assumption
+					// We are going to ASSUME (bad, bad) that it is dd-mon-yy  which is a horrible assumption
 					p.ambiguousMD = true
 					p.yearlen = 2
 					p.set(p.yeari, "06")
@@ -1951,7 +1951,7 @@ iterRunes:
 			// We have no idea if this is
 			// yy-mon-dd   OR  dd-mon-yy
 			//
-			// We are going to ASSUME (bad, bad) that it is dd-mon-yy  which is a horible assumption
+			// We are going to ASSUME (bad, bad) that it is dd-mon-yy  which is a horrible assumption
 			p.ambiguousMD = true
 			p.yearlen = 2
 			p.set(p.yeari, "06")
@@ -1978,7 +1978,7 @@ iterRunes:
 			// We have no idea if this is
 			// yy-mon-dd   OR  dd-mon-yy
 			//
-			// We are going to ASSUME (bad, bad) that it is dd-mon-yy  which is a horible assumption
+			// We are going to ASSUME (bad, bad) that it is dd-mon-yy  which is a horrible assumption
 			p.ambiguousMD = true
 			p.yearlen = 2
 			p.set(p.yeari, "06")

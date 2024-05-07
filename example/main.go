@@ -3,10 +3,11 @@ package main
 import (
 	"flag"
 	"fmt"
+	"os"
 	"time"
 
 	"github.com/godoes/dateparse"
-	"github.com/scylladb/termtables"
+	"github.com/olekukonko/tablewriter"
 )
 
 var examples = []string{
@@ -150,17 +151,21 @@ func main() {
 		time.Local = loc
 	}
 
-	table := termtables.CreateTable()
+	table := tablewriter.NewWriter(os.Stdout)
+	table.SetAutoWrapText(false)
+	table.SetAutoFormatHeaders(false)
+	table.SetAlignment(tablewriter.ALIGN_LEFT)
+	table.SetHeaderAlignment(tablewriter.ALIGN_LEFT)
 
-	table.AddHeaders("Input", "Parsed, and Output as %v")
+	table.SetHeader([]string{"Input", "Parsed, and Output as %v"})
 	for _, dateExample := range examples {
 		t, err := dateparse.ParseLocal(dateExample)
 		if err != nil {
 			panic(err.Error())
 		}
-		table.AddRow(dateExample, fmt.Sprintf("%v", t))
+		table.Append([]string{dateExample, fmt.Sprintf("%v", t)})
 	}
-	fmt.Println(table.Render())
+	table.Render()
 }
 
 /*

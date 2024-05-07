@@ -7,7 +7,7 @@ import (
 	"time"
 
 	"github.com/godoes/dateparse"
-	"github.com/scylladb/termtables"
+	"github.com/olekukonko/tablewriter"
 )
 
 var (
@@ -53,9 +53,13 @@ func main() {
 	}
 	fmt.Printf("\n")
 
-	table := termtables.CreateTable()
+	table := tablewriter.NewWriter(os.Stdout)
+	table.SetAutoWrapText(false)
+	table.SetAutoFormatHeaders(false)
+	table.SetAlignment(tablewriter.ALIGN_LEFT)
+	table.SetHeaderAlignment(tablewriter.ALIGN_LEFT)
 
-	table.AddHeaders("method", "Zone Source", "Parsed", "Parsed: t.In(time.UTC)")
+	table.SetHeader([]string{"method", "Zone Source", "Parsed", "Parsed: t.In(time.UTC)"})
 
 	parsers := map[string]parser{
 		"ParseAny":    parseAny,
@@ -66,16 +70,16 @@ func main() {
 
 	for name, parser := range parsers {
 		time.Local = nil
-		table.AddRow(name, "time.Local = nil", parser(datestr, nil, false), parser(datestr, nil, true))
+		table.Append([]string{name, "time.Local = nil", parser(datestr, nil, false), parser(datestr, nil, true)})
 		if timezone != "" {
 			time.Local = loc
-			table.AddRow(name, "time.Local = timezone arg", parser(datestr, loc, false), parser(datestr, loc, true))
+			table.Append([]string{name, "time.Local = timezone arg", parser(datestr, loc, false), parser(datestr, loc, true)})
 		}
 		time.Local = time.UTC
-		table.AddRow(name, "time.Local = time.UTC", parser(datestr, time.UTC, false), parser(datestr, time.UTC, true))
+		table.Append([]string{name, "time.Local = time.UTC", parser(datestr, time.UTC, false), parser(datestr, time.UTC, true)})
 	}
 
-	fmt.Println(table.Render())
+	table.Render()
 }
 
 type parser func(datestr string, loc *time.Location, utc bool) string
