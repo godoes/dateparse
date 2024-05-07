@@ -23,16 +23,3 @@ changelog:
     exclude:
       - '^docs:'
       - '^test:'
-nfpms:
-  -
-    vendor: dateparse
-    homepage: https://github.com/godoes/dateparse
-    maintainer: n/a <someone@eample.com>
-    description: NA
-    formats:
-      - apk
-      - deb
-      - rpm
-    release: "1"
-    section: default
-    priority: extra
