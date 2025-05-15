@@ -408,14 +408,15 @@ iterRunes:
 				// 12 Feb 2006, 19:17
 				// 12 Feb 2006, 19:17:22
 				// 2013 Jan 06 15:04:05
-				if i == 4 {
+				switch i {
+				case 4:
 					p.yearlen = i
 					p.moi = i + 1
 					p.setYear()
 					p.stateDate = dateYearWs
-				} else if i == 6 {
+				case 6:
 					p.stateDate = dateDigitSt
-				} else {
+				default:
 					p.stateDate = dateDigitWs
 					p.dayi = 0
 					p.daylen = i
@@ -551,14 +552,15 @@ iterRunes:
 				// we need to find if this was 4 digits, aka year
 				// or 2 digits which makes it ambiguous year/day
 				length := i - (p.moi + p.molen + 1)
-				if length == 4 {
+				switch length {
+				case 4:
 					p.yearlen = 4
 					p.set(p.yeari, "2006")
 					// We now also know that part1 was the day
 					p.dayi = 0
 					p.daylen = p.part1Len
 					p.setDay()
-				} else if length == 2 {
+				case 2:
 					// We have no idea if this is
 					// yy-mon-dd   OR  dd-mon-yy
 					//
@@ -570,6 +572,7 @@ iterRunes:
 					p.dayi = 0
 					p.daylen = p.part1Len
 					p.setDay()
+				default:
 				}
 				p.stateTime = timeStart
 				break iterRunes
@@ -581,14 +584,15 @@ iterRunes:
 				// we need to find if this was 4 digits, aka year
 				// or 2 digits which makes it ambiguous year/day
 				length := i - (p.moi + p.molen + 1)
-				if length == 4 {
+				switch length {
+				case 4:
 					p.yearlen = 4
 					p.set(p.yeari, "2006")
 					// We now also know that part1 was the day
 					p.dayi = 0
 					p.daylen = p.part1Len
 					p.setDay()
-				} else if length == 2 {
+				case 2:
 					// We have no idea if this is
 					// yy-mon-dd   OR  dd-mon-yy
 					//
@@ -600,6 +604,7 @@ iterRunes:
 					p.dayi = 0
 					p.daylen = p.part1Len
 					p.setDay()
+				default:
 				}
 				p.stateTime = timeStart
 				break iterRunes
@@ -876,8 +881,8 @@ iterRunes:
 			//   Thu, 13 Jul 2017 08:58:40 +0100
 			//   Tue, 11 Jul 2017 16:28:13 +0200 (CEST)
 			//   Mon, 02-Jan-06 15:04:05 MST
-			switch {
-			case r == ' ':
+			switch r {
+			case ' ':
 				//      X
 				// April 8, 2009
 				if i > 3 {
@@ -917,7 +922,7 @@ iterRunes:
 					p.stateDate = dateAlphaWs
 				}
 
-			case r == ',':
+			case ',':
 				// Mon, 02 Jan 2006
 
 				if i == 3 {
@@ -931,18 +936,19 @@ iterRunes:
 					// the mon, monday, they are all superfluous and not needed
 					// just lay down the skip, no need to fill and then skip
 				}
-			case r == '.':
+			case '.':
 				// sept. 28, 2017
 				// jan. 28, 2017
 				p.stateDate = dateAlphaPeriodWsDigit
-				if i == 3 {
+				switch i {
+				case 3:
 					p.molen = i
 					p.set(0, "Jan")
-				} else if i == 4 {
+				case 4:
 					// gross
 					datestr = datestr[0:i-1] + datestr[i:]
 					return parseTime(datestr, loc, opts...)
-				} else {
+				default:
 					return nil, unknownErr(datestr)
 				}
 			}
@@ -1446,10 +1452,12 @@ iterRunes:
 					} else {
 						p.tzlen = i - p.tzi
 					}
-					if p.tzlen == 4 {
+					switch p.tzlen {
+					case 4:
 						p.set(p.tzi, " MST")
-					} else if p.tzlen == 3 {
+					case 3:
 						p.set(p.tzi, "MST")
+					default:
 					}
 					p.stateTime = timeWsAlphaZoneOffset
 					p.offseti = i
@@ -1457,10 +1465,12 @@ iterRunes:
 					// 17:57:51 MST 2009
 					// 17:57:51 MST
 					p.tzlen = i - p.tzi
-					if p.tzlen == 4 {
+					switch p.tzlen {
+					case 4:
 						p.set(p.tzi, " MST")
-					} else if p.tzlen == 3 {
+					case 3:
 						p.set(p.tzi, "MST")
+					default:
 					}
 					p.stateTime = timeWsAlphaWs
 					p.yeari = i + 1
@@ -1515,9 +1525,10 @@ iterRunes:
 					//return parse("2006-01-02 03:04:05 PM", datestr, loc)
 					p.stateTime = timeWsAMPM
 					p.set(i-1, "PM")
-					if p.hourlen == 2 {
+					switch p.hourlen {
+					case 2:
 						p.set(p.houri, "03")
-					} else if p.hourlen == 1 {
+					case 1:
 						p.set(p.houri, "3")
 					}
 				} else {
@@ -1940,14 +1951,15 @@ iterRunes:
 		// 28-Feb-03   ambiguous
 		// 29-Jun-2016
 		length := len(datestr) - (p.moi + p.molen + 1)
-		if length == 4 {
+		switch length {
+		case 4:
 			p.yearlen = 4
 			p.set(p.yeari, "2006")
 			// We now also know that part1 was the day
 			p.dayi = 0
 			p.daylen = p.part1Len
 			p.setDay()
-		} else if length == 2 {
+		case 2:
 			// We have no idea if this is
 			// yy-mon-dd   OR  dd-mon-yy
 			//
@@ -1959,6 +1971,7 @@ iterRunes:
 			p.dayi = 0
 			p.daylen = p.part1Len
 			p.setDay()
+		default:
 		}
 
 		return p, nil
@@ -1967,14 +1980,15 @@ iterRunes:
 		// 28-02-03   ambiguous
 		// 29-06-2016
 		length := len(datestr) - (p.moi + p.molen + 1)
-		if length == 4 {
+		switch length {
+		case 4:
 			p.yearlen = 4
 			p.set(p.yeari, "2006")
 			// We now also know that part1 was the day
 			p.dayi = 0
 			p.daylen = p.part1Len
 			p.setDay()
-		} else if length == 2 {
+		case 2:
 			// We have no idea if this is
 			// yy-mon-dd   OR  dd-mon-yy
 			//
@@ -1986,6 +2000,7 @@ iterRunes:
 			p.dayi = 0
 			p.daylen = p.part1Len
 			p.setDay()
+		default:
 		}
 
 		return p, nil
@@ -2198,25 +2213,31 @@ func (p *parser) set(start int, val string) {
 	}
 }
 func (p *parser) setMonth() {
-	if p.molen == 2 {
+	switch p.molen {
+	case 2:
 		p.set(p.moi, "01")
-	} else if p.molen == 1 {
+	case 1:
 		p.set(p.moi, "1")
+	default:
 	}
 }
 
 func (p *parser) setDay() {
-	if p.daylen == 2 {
+	switch p.daylen {
+	case 2:
 		p.set(p.dayi, "02")
-	} else if p.daylen == 1 {
+	case 1:
 		p.set(p.dayi, "2")
+	default:
 	}
 }
 func (p *parser) setYear() {
-	if p.yearlen == 2 {
+	switch p.yearlen {
+	case 2:
 		p.set(p.yeari, "06")
-	} else if p.yearlen == 4 {
+	case 4:
 		p.set(p.yeari, "2006")
+	default:
 	}
 }
 func (p *parser) coalesceDate(end int) {
@@ -2248,10 +2269,12 @@ func (p *parser) coalesceTime(end int) {
 	// 3:4:5
 	// 15:04:05.00
 	if p.houri > 0 {
-		if p.hourlen == 2 {
+		switch p.hourlen {
+		case 2:
 			p.set(p.houri, "15")
-		} else if p.hourlen == 1 {
+		case 1:
 			p.set(p.houri, "3")
+		default:
 		}
 	}
 	if p.mini > 0 {
